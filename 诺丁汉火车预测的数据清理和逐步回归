@@ -1,0 +1,290 @@
+
+setwd("C:\\Users\\ASUS\\Desktop\\R machine learning data")
+load("trainsData.RData")
+textToSeconds<-function(textTime)
+{
+  seconds<-as.numeric(strsplit(textTime,split=":")[[1]])%*%c(60*60,60,1)
+  return(as.numeric(seconds))
+}
+
+matrixData<-data.frame(
+  code=rep(0,length(trainingData)),
+  hour=rep(0,length(trainingData)),
+  day=rep(" ",length(trainingData)),
+  
+  Leeds.trains=rep(0,length(trainingData)),
+  Shef.trains=rep(0,length(trainingData)),
+  Notts.trains=rep(0,length(trainingData)),
+  
+  
+  Leeds.av.delay=rep(0,length(trainingData)),
+  Shef.av.delay=rep(0,length(trainingData)),
+  Notts.av.delay=rep(0,length(trainingData)),
+  
+  Leeds.normal.delay=rep(0,length(trainingData)),
+  Shef.normal.delay=rep(0,length(trainingData)),
+  Shef.daynormal.delay=rep(0,length(trainingData)),
+  
+  
+  departure.delayLeeds=rep(0,length(trainingData)),
+  departure.delayNORMN=rep(0,length(trainingData)),
+  departure.delayWKFLD=rep(0,length(trainingData)),
+  departure.delayBNSLY=rep(0,length(trainingData)),
+  departure.delayMEADW=rep(0,length(trainingData)),
+  arrival.delayNORMN=rep(0,length(trainingData)),
+  arrival.delayWKFLD=rep(0,length(trainingData)),
+  arrival.delayBNSLY=rep(0,length(trainingData)),
+  arrival.delayMEADW=rep(0,length(trainingData)),
+  arrival.delayShef=rep(0,length(trainingData)),
+  arrival.delayNotts=rep(0,length(trainingData)),
+  stringsAsFactors=FALSE
+)
+
+
+########################
+
+for(i in 1:length(trainingData)){
+  dummy<-trainingData[[i]]
+  matrixData$day[i]<-dummy$timings$day.week[1]
+  
+  arrNORMN<-textToSeconds(ifelse('NORMNTN' %in% dummy$timings$arrival.to,dummy$timings$arrival.time[which(dummy$timings$arrival.to=="NORMNTN",arr.ind=TRUE)],'99:99:99'))
+  schNORMN<-textToSeconds(ifelse('NORMNTN' %in% dummy$timings$arrival.to,dummy$timings$arrival.schedule[which(dummy$timings$arrival.to=="NORMNTN",arr.ind=TRUE)],'00:00:00'))
+  arrWKFLD<-textToSeconds(ifelse('WKFLDKG' %in% dummy$timings$arrival.to,dummy$timings$arrival.time[which(dummy$timings$arrival.to=="WKFLDKG",arr.ind=TRUE)],'99:99:99'))
+  schWKFLD<-textToSeconds(ifelse('WKFLDKG' %in% dummy$timings$arrival.to,dummy$timings$arrival.schedule[which(dummy$timings$arrival.to=="WKFLDKG",arr.ind=TRUE)],'00:00:00'))
+  arrBNSLY<-textToSeconds(ifelse('BNSLY' %in% dummy$timings$arrival.to,dummy$timings$arrival.time[which(dummy$timings$arrival.to=="BNSLY",arr.ind=TRUE)],'99:99:99'))
+  schBNSLY<-textToSeconds(ifelse('BNSLY' %in% dummy$timings$arrival.to,dummy$timings$arrival.schedule[which(dummy$timings$arrival.to=="BNSLY",arr.ind=TRUE)],'00:00:00'))
+  arrMEADW<-textToSeconds(ifelse('MEADWHL' %in% dummy$timings$arrival.to,dummy$timings$arrival.time[which(dummy$timings$arrival.to=="MEADWHL",arr.ind=TRUE)],'99:99:99'))
+  schMEADW<-textToSeconds(ifelse('MEADWHL' %in% dummy$timings$arrival.to,dummy$timings$arrival.schedule[which(dummy$timings$arrival.to=="MEADWHL",arr.ind=TRUE)],'00:00:00'))
+  arrSheffield<-textToSeconds(ifelse('SHEFFLD' %in% dummy$timings$arrival.to,dummy$timings$arrival.time[which(dummy$timings$arrival.to=="SHEFFLD",arr.ind=TRUE)],'99:99:99'))
+  schSheffield<-textToSeconds(ifelse('SHEFFLD' %in% dummy$timings$arrival.to,dummy$timings$arrival.schedule[which(dummy$timings$arrival.to=="SHEFFLD",arr.ind=TRUE)],'00:00:00'))
+  
+  departuretime.Leeds<-textToSeconds(ifelse('LEEDS' %in% dummy$timings$departure.from,dummy$timings$departure.time[which(dummy$timings$departure.from=="LEEDS",arr.ind=TRUE)],'99:99:99'))
+  departureschedule.Leeds<-textToSeconds(ifelse('LEEDS' %in% dummy$timings$departure.from,dummy$timings$departure.schedule[which(dummy$timings$departure.from=="LEEDS",arr.ind=TRUE)],'00:00:00'))
+  
+  departuretime.NORMN<-textToSeconds(ifelse('NORMNTN' %in% dummy$timings$departure.from,dummy$timings$departure.time[which(dummy$timings$departure.from=="NORMNTN",arr.ind=TRUE)],'99:99:99'))
+  departureschedule.NORMN<-textToSeconds(ifelse('NORMNTN' %in% dummy$timings$departure.from,dummy$timings$departure.schedule[which(dummy$timings$departure.from=="NORMNTN",arr.ind=TRUE)],'00:00:00'))
+  
+  departuretime.WKFLD<-textToSeconds(ifelse('WKFLDKG' %in% dummy$timings$departure.from,dummy$timings$departure.time[which(dummy$timings$departure.from=="WKFLDKG",arr.ind=TRUE)],'99:99:99'))
+  departureschedule.WKFLD<-textToSeconds(ifelse('WKFLDKG' %in% dummy$timings$departure.from,dummy$timings$departure.schedule[which(dummy$timings$departure.from=="WKFLDKG",arr.ind=TRUE)],'00:00:00'))
+  
+  departuretime.BNSLY<-textToSeconds(ifelse('BNSLY' %in% dummy$timings$departure.from,dummy$timings$departure.time[which(dummy$timings$departure.from=="BNSLY",arr.ind=TRUE)],'99:99:99'))
+  departureschedule.BNSLY<-textToSeconds(ifelse('BNSLY' %in% dummy$timings$departure.from,dummy$timings$departure.schedule[which(dummy$timings$departure.from=="BNSLY",arr.ind=TRUE)],'00:00:00'))
+  
+  departuretime.MEADW<-textToSeconds(ifelse('MEADWHL' %in% dummy$timings$departure.from,dummy$timings$departure.time[which(dummy$timings$departure.from=="MEADWHL",arr.ind=TRUE)],'99:99:99'))
+  departureschedule.MEADW<-textToSeconds(ifelse('MEADWHL' %in% dummy$timings$departure.from,dummy$timings$departure.schedule[which(dummy$timings$departure.from=="MEADWHL",arr.ind=TRUE)],'00:00:00'))
+  
+  matrixData$code[i]<-dummy$timings$train.code[1]
+  matrixData$hour[i]<-dummy$congestion$hour[1]
+  
+  matrixData$Leeds.trains[i]<-dummy$congestion$Leeds.trains[1]
+  matrixData$Shef.trains[i]<-dummy$congestion$Sheffield.trains[1]
+  matrixData$Notts.trains[i]<-dummy$congestion$Nottingham.trains[1]
+  
+  
+  
+  matrixData$Leeds.av.delay[i]<-(dummy$congestion$Leeds.av.delay[1])*60
+  matrixData$Shef.av.delay[i]<-(dummy$congestion$Sheffield.av.delay[1])*60
+  matrixData$Notts.av.delay[i]<-(dummy$congestion$Nottingham.av.delay[1])*60
+  
+  
+  matrixData$departure.delayLeeds[i]<-departuretime.Leeds-departureschedule.Leeds
+  matrixData$departure.delayNORMN[i]<-departuretime.NORMN-departureschedule.NORMN
+  matrixData$departure.delayWKFLD[i]<-departuretime.WKFLD-departureschedule.WKFLD
+  matrixData$departure.delayBNSLY[i]<-departuretime.BNSLY-departureschedule.BNSLY
+  matrixData$departure.delayMEADW[i]<-departuretime.MEADW-departureschedule.MEADW
+  
+  matrixData$arrival.delayNORMN[i]<-arrNORMN-schNORMN
+  matrixData$arrival.delayWKFLD[i]<-arrWKFLD-schWKFLD
+  matrixData$arrival.delayBNSLY[i]<-arrBNSLY-schBNSLY
+  matrixData$arrival.delayMEADW[i]<-arrMEADW-schMEADW
+  matrixData$arrival.delayShef[i]<-arrSheffield-schSheffield
+  matrixData$arrival.delayNotts[i]<-dummy$arrival$delay.secs[1]
+  
+  matrixData$Leeds.normal.delay[i]<-departuretime.Leeds-departureschedule.Leeds-(historicalCongestion$Leeds.av.delay[which(historicalCongestion$Day==dummy$timings$day.week[1]&historicalCongestion$Hour==dummy$congestion$hour[1])])*60
+  matrixData$Shef.normal.delay[i]<-arrSheffield-schSheffield-(historicalCongestion$Sheffield.av.delay[which(historicalCongestion$Day==dummy$timings$day.week[1]&historicalCongestion$Hour==dummy$congestion$hour[1])])*60
+  matrixData$Shef.daynormal.delay[i]<-arrSheffield-schSheffield-(dummy$congestion$Sheffield.av.delay[1])*60
+  
+  
+};
+matrixData[matrixData==362439] <- 0
+head(matrixData)
+
+matrixData.test<-data.frame(
+  code=rep(0,length(testData)),
+  hour=rep(0,length(testData)),
+  day=rep(" ",length(testData)),
+  
+  Leeds.trains=rep(0,length(testData)),
+  Shef.trains=rep(0,length(testData)),
+  Notts.trains=rep(0,length(testData)),
+  
+  
+  
+  Leeds.av.delay=rep(0,length(testData)),
+  Shef.av.delay=rep(0,length(testData)),
+  Notts.av.delay=rep(0,length(testData)),
+  
+  Leeds.normal.delay=rep(0,length(testData)),
+  Shef.normal.delay=rep(0,length(testData)),
+  Shef.daynormal.delay=rep(0,length(testData)),
+  
+  
+  
+  departure.delayLeeds=rep(0,length(testData)),
+  departure.delayNORMN=rep(0,length(testData)),
+  departure.delayWKFLD=rep(0,length(testData)),
+  departure.delayBNSLY=rep(0,length(testData)),
+  departure.delayMEADW=rep(0,length(testData)),
+  arrival.delayNORMN=rep(0,length(testData)),
+  arrival.delayWKFLD=rep(0,length(testData)),
+  arrival.delayBNSLY=rep(0,length(testData)),
+  arrival.delayMEADW=rep(0,length(testData)),
+  arrival.delayShef=rep(0,length(testData)),
+  stringsAsFactors=FALSE
+)
+
+
+for(i in 1:length(testData)){
+  dummy1<-testData[[i]]
+  matrixData.test$day[i]<-dummy1$timings$day.week[1]
+  
+  
+  arrNORMN.test<-textToSeconds(ifelse('NORMNTN' %in% dummy1$timings$arrival.to,dummy1$timings$arrival.time[which(dummy1$timings$arrival.to=="NORMNTN",arr.ind=TRUE)],'99:99:99'))
+  schNORMN.test<-textToSeconds(ifelse('NORMNTN' %in% dummy1$timings$arrival.to,dummy1$timings$arrival.schedule[which(dummy1$timings$arrival.to=="NORMNTN",arr.ind=TRUE)],'00:00:00'))
+  arrWKFLD.test<-textToSeconds(ifelse('WKFLDKG' %in% dummy1$timings$arrival.to,dummy1$timings$arrival.time[which(dummy1$timings$arrival.to=="WKFLDKG",arr.ind=TRUE)],'99:99:99'))
+  schWKFLD.test<-textToSeconds(ifelse('WKFLDKG' %in% dummy1$timings$arrival.to,dummy1$timings$arrival.schedule[which(dummy1$timings$arrival.to=="WKFLDKG",arr.ind=TRUE)],'00:00:00'))
+  arrBNSLY.test<-textToSeconds(ifelse('BNSLY' %in% dummy1$timings$arrival.to,dummy1$timings$arrival.time[which(dummy1$timings$arrival.to=="BNSLY",arr.ind=TRUE)],'99:99:99'))
+  schBNSLY.test<-textToSeconds(ifelse('BNSLY' %in% dummy1$timings$arrival.to,dummy1$timings$arrival.schedule[which(dummy1$timings$arrival.to=="BNSLY",arr.ind=TRUE)],'00:00:00'))
+  arrMEADW.test<-textToSeconds(ifelse('MEADWHL' %in% dummy1$timings$arrival.to,dummy1$timings$arrival.time[which(dummy1$timings$arrival.to=="MEADWHL",arr.ind=TRUE)],'99:99:99'))
+  schMEADW.test<-textToSeconds(ifelse('MEADWHL' %in% dummy1$timings$arrival.to,dummy1$timings$arrival.schedule[which(dummy1$timings$arrival.to=="MEADWHL",arr.ind=TRUE)],'00:00:00'))
+  arrSheffield.test<-textToSeconds(ifelse('SHEFFLD' %in% dummy1$timings$arrival.to,dummy1$timings$arrival.time[which(dummy1$timings$arrival.to=="SHEFFLD",arr.ind=TRUE)],'99:99:99'))
+  schSheffield.test<-textToSeconds(ifelse('SHEFFLD' %in% dummy1$timings$arrival.to,dummy1$timings$arrival.schedule[which(dummy1$timings$arrival.to=="SHEFFLD",arr.ind=TRUE)],'00:00:00'))
+  
+  departuretime.Leeds.test<-textToSeconds(ifelse('LEEDS' %in% dummy1$timings$departure.from,dummy1$timings$departure.time[which(dummy1$timings$departure.from=="LEEDS",arr.ind=TRUE)],'99:99:99'))
+  departureschedule.Leeds.test<-textToSeconds(ifelse('LEEDS' %in% dummy1$timings$departure.from,dummy1$timings$departure.schedule[which(dummy1$timings$departure.from=="LEEDS",arr.ind=TRUE)],'00:00:00'))
+  departuretime.NORMN.test<-textToSeconds(ifelse('NORMNTN' %in% dummy1$timings$departure.from,dummy1$timings$departure.time[which(dummy1$timings$departure.from=="NORMNTN",arr.ind=TRUE)],'99:99:99'))
+  departureschedule.NORMN.test<-textToSeconds(ifelse('NORMNTN' %in% dummy1$timings$departure.from,dummy1$timings$departure.schedule[which(dummy1$timings$departure.from=="NORMNTN",arr.ind=TRUE)],'00:00:00'))
+  departuretime.WKFLD.test<-textToSeconds(ifelse('WKFLDKG' %in% dummy1$timings$departure.from,dummy1$timings$departure.time[which(dummy1$timings$departure.from=="WKFLDKG",arr.ind=TRUE)],'99:99:99'))
+  departureschedule.WKFLD.test<-textToSeconds(ifelse('WKFLDKG' %in% dummy1$timings$departure.from,dummy1$timings$departure.schedule[which(dummy1$timings$departure.from=="WKFLDKG",arr.ind=TRUE)],'00:00:00'))
+  departuretime.BNSLY.test<-textToSeconds(ifelse('BNSLY' %in% dummy1$timings$departure.from,dummy1$timings$departure.time[which(dummy1$timings$departure.from=="BNSLY",arr.ind=TRUE)],'99:99:99'))
+  departureschedule.BNSLY.test<-textToSeconds(ifelse('BNSLY' %in% dummy1$timings$departure.from,dummy1$timings$departure.schedule[which(dummy1$timings$departure.from=="BNSLY",arr.ind=TRUE)],'00:00:00'))
+  departuretime.MEADW.test<-textToSeconds(ifelse('MEADWHL' %in% dummy1$timings$departure.from,dummy1$timings$departure.time[which(dummy1$timings$departure.from=="MEADWHL",arr.ind=TRUE)],'99:99:99'))
+  departureschedule.MEADW.test<-textToSeconds(ifelse('MEADWHL' %in% dummy1$timings$departure.from,dummy1$timings$departure.schedule[which(dummy1$timings$departure.from=="MEADWHL",arr.ind=TRUE)],'00:00:00'))
+  
+  matrixData.test$code[i]<-dummy1$timings$train.code[1]
+  matrixData.test$hour[i]<-dummy1$congestion$hour[1]
+  
+  matrixData.test$Leeds.trains[i]<-dummy1$congestion$Leeds.trains[1]
+  matrixData.test$Shef.trains[i]<-dummy1$congestion$Sheffield.trains[1]
+  matrixData.test$Notts.trains[i]<-dummy1$congestion$Nottingham.trains[1]
+  
+  
+  matrixData.test$Leeds.av.delay[i]<-(dummy1$congestion$Leeds.av.delay[1])*60
+  matrixData.test$Shef.av.delay[i]<-(dummy1$congestion$Sheffield.av.delay[1])*60
+  matrixData.test$Notts.av.delay[i]<-(dummy1$congestion$Nottingham.av.delay[1])*60
+  
+  
+  matrixData.test$departure.delayLeeds[i]<-departuretime.Leeds.test-departureschedule.Leeds.test
+  matrixData.test$departure.delayNORMN[i]<-departuretime.NORMN.test-departureschedule.NORMN.test
+  matrixData.test$departure.delayWKFLD[i]<-departuretime.WKFLD.test-departureschedule.WKFLD.test
+  matrixData.test$departure.delayBNSLY[i]<-departuretime.BNSLY.test-departureschedule.BNSLY.test
+  matrixData.test$departure.delayMEADW[i]<-departuretime.MEADW.test-departureschedule.MEADW.test
+  matrixData.test$arrival.delayNORMN[i]<-arrNORMN.test-schNORMN.test
+  matrixData.test$arrival.delayWKFLD[i]<-arrWKFLD.test-schWKFLD.test
+  matrixData.test$arrival.delayBNSLY[i]<-arrBNSLY.test-schBNSLY.test
+  matrixData.test$arrival.delayMEADW[i]<-arrMEADW.test-schMEADW.test
+  matrixData.test$arrival.delayShef[i]<-arrSheffield.test-schSheffield.test
+  
+  matrixData.test$Leeds.normal.delay[i]<-departuretime.Leeds.test-departureschedule.Leeds.test-(historicalCongestion$Leeds.av.delay[which(historicalCongestion$Day==dummy1$timings$day.week[1]&historicalCongestion$Hour==dummy1$congestion$hour[1])])*60
+  matrixData.test$Shef.normal.delay[i]<-arrSheffield.test-schSheffield.test-(historicalCongestion$Sheffield.av.delay[which(historicalCongestion$Day==dummy1$timings$day.week[1]&historicalCongestion$Hour==dummy1$congestion$hour[1])])*60
+  matrixData.test$Shef.daynormal.delay[i]<-arrSheffield.test-schSheffield.test-(dummy1$congestion$Sheffield.av.delay[1])*60
+  
+  
+};
+matrixData.test[matrixData.test==362439] <- 0
+
+
+
+set.seed(3)
+fullsize=nrow(matrixData)
+samplesize = 0.80 * fullsize
+index = sample( seq_len ( nrow ( matrixData) ), size = samplesize ) #randomly choose elements
+#Create training and test set
+subtrain = matrixData[index,]
+subtest = matrixData[-index,]
+head(subtrain)
+
+
+#linear
+lm.Fsub <-lm(arrival.delayNotts ~., data = subtrain[,-c(2,4:9,14,15,18,19)])
+lm.Fpredictionsub <- predict(lm.Fsub, newdata =subtest[,-c(2,4:9,14,15,18,19,23)])
+amse.lm.Fsub=(1/372)*(sum((lm.Fpredictionsub-subtest[,23])^2))
+
+library(glmnet)
+#lasso
+x <- model.matrix(arrival.delayNotts~., data=subtrain[,-c(2,4:9,14,15,18,19)])[,-1]
+y <-subtrain$arrival.delayNotts
+
+lambda.cv<-cv.glmnet(x,y,type.measure = "mse", nfolds = 10,alpha=1)
+lambda.opt<- lambda.cv$lambda.min
+# (a) analyse prediction error
+lasso.pred<-predict(lasso.model,test)
+lm.lasso=(1/372)*(sum((prediction.lasso-subtest[,23])^2))
+
+
+
+#both
+library(tidyverse)
+library(leaps)
+library(MASS)
+library(glmnet)
+full.model <-lm(arrival.delayNotts ~., data = matrixData[,-c(2,4:9,14,15,18,19)])
+step(full.model)
+# Stepwise regression model
+step.model<-stepAIC(full.model, direction = "both", 
+                    trace = FALSE)
+summary(step.model)
+step(step.model)
+full.model <-lm(arrival.delayNotts ~., data = subtrain[,-c(2,4:9,14,15,18,19)])
+AIC.pre<-predict(step.model,subtest[,-c(2,4:9,14,15,18,19,23)])
+amse.AIC<-(1/372)*(sum((AIC.pre-subtest[,23])^2))
+
+#
+full.modelb <-lm(arrival.delayNotts ~., data = matrixData[,-c(2,4:9,14,15,18,19)])
+# Stepwise regression model
+step.modelb<-stepAIC(full.model, direction = "backward", 
+                     trace = FALSE)
+summary(step.modelb)
+step(step.modelb)
+full.modelb <-lm(arrival.delayNotts ~., data = subtrain[,-c(2,4:9,14,15,18,19)])
+AIC.preb<-predict(step.modelb,subtest[,-c(2,4:9,14,15,18,19,23)])
+amse.AICb<-(1/372)*(sum((AIC.preb-subtest[,23])^2))
+
+
+
+
+
+
+
+######forward
+full.modelf <-lm(arrival.delayNotts ~., data = matrixData[,-c(2,4:9,14,15,18,19)])
+# Stepwise regression model
+step.modelf<-stepAIC(full.model, direction = "forward", 
+                     trace = FALSE)
+summary(step.modelf)
+step(full.modelb)
+step(step.modelf)
+step(step.)
+full.modelf <-lm(arrival.delayNotts ~., data = subtrain[,-c(2,4:9,14,15,18,19)])
+AIC.pref<-predict(step.modelf,subtest[,-c(2,4:9,14,15,18,19,23)])
+amse.AICf<-(1/372)*(sum((AIC.pref-subtest[,23])^2))
+
+# backward
+full.model <-lm(arrival.delayNotts ~., data = matrixData[,-c(2,4:9,14,15,18,19)])
+# Stepwise regression model
+step.model<-stepAIC(full.model, direction = "both", 
+                    trace = FALSE)
+summary(step.model)
+step(step.model)
+AIC.pre<-predict(step.model,subtest[,-c(4:9)])
+mse.AIC<-sum((AIC.pre-y.subtest)^2)/370
