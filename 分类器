@@ -1,0 +1,396 @@
+rm(list = ls())
+setwd("C:\\Users\\ASUS\\Desktop\\R machine learning data")
+c3train<-read.csv('training_set.csv')
+c3test<-read.csv('test_set.csv')
+
+install.packages('e1071')
+install.packages('SuperLearner')
+install.packages('CRAN')
+library(e1071) #SVM (See here haris)
+
+
+double_data<-rbind(training_set,training_set)
+
+
+##knn
+install.packages('kknn')
+library(kknn)
+install.packages('caret')
+library(caret)
+install.packages('class')
+library(class)
+install.packages('corrplot')
+library(corrplot)
+grid1 <- expand.grid(.k = seq(2, 20, by = 1))
+control <- trainControl(method = "cv")
+
+c3train.types <- split(c3train, c3train$Impurity.Type)
+#Correlation by contaminant types
+corra<-corrplot.mixed(cor(c3train.types$A[,-2]), lower.col = 'black', title = "Type A correlation", number.cex = 1)
+corrb<-corrplot.mixed(cor(c3train.types$B[,-2]), lower.col = 'black', title = "Type B correlation", number.cex = 1)
+corrc<-corrplot.mixed(cor(c3train.types$C[,-2]), lower.col = 'black', title = "Type C correlation", number.cex = 1)
+corrd<-corrplot.mixed(cor(c3train.types$D[,-2]), lower.col = 'black', title = "Type D correlation", number.cex = 1)
+corre<-corrplot.mixed(cor(c3train.types$E[,-2]), lower.col = 'black', title = "Type E correlation", number.cex = 1)
+corrf<-corrplot.mixed(cor(c3train.types$F[,-2]), lower.col = 'black', title = "Type F correlation", number.cex = 1)
+corrg<-corrplot.mixed(cor(c3train.types$G[,-2]), lower.col = 'black', title = "Type G correlation", number.cex = 1)
+corrh<-corrplot.mixed(cor(c3train.types$H[,-2]), lower.col = 'black', title = "Type H correlation", number.cex = 1)
+corrj<-corrplot.mixed(cor(c3train.types$J[,-2]), lower.col = 'black', title = "Type J correlation", number.cex = 1)
+corrk<-corrplot.mixed(cor(c3train.types$K[,-2]), lower.col = 'black', title = "Type K corrleation", number.cex = 1)
+corrl<-corrplot.mixed(cor(c3train.types$L[,-2]), lower.col = 'black', title = "Type L correlation", number.cex = 1)
+corrm<-corrplot.mixed(cor(c3train.types$M[,-2]), lower.col = 'black', title = "Type M correlation", number.cex = 1)
+corrn<-corrplot.mixed(cor(c3train.types$N[,-2]), lower.col = 'black', title = "Type N correlation", number.cex = 1)
+
+
+#m equals to the number of training_set's row 
+m <- dim(training_set)[1]
+#choose sample data
+val <- sample(1:m, size = round(m*0.8), replace = FALSE, prob = rep(1/m, m))
+#build training.subset
+chem.learn.scale<-scale(training_set[val,c(-1,-2)],center = T)
+chem.learn<-cbind(training_set[val,c(1,2)],chem.learn.scale)
+#build. test.subset
+chem.test.scale<-scale(training_set[-val,c(-1,-2)],center = T)
+chem.test<-cbind(training_set[-val,c(1,2)],chem.test.scale)
+
+chem.cv<-train.kknn(Impurity.Type~I+II+III+IV+V+Temp, data = training_set,kmax = 5, kernel = c("rectangular", "triangular", "epanechnikov","gaussian", "rank", "optimal"),distance = 2,scale = TRUE)
+summary(chem.cv)
+
+chem.kknn<-kknn(Impurity.Type~I+II+III+IV+V+Temp,chem.learn,chem.test,k=7,scale=TRUE,distance=2)
+summary(chem.kknn)
+
+fit <- fitted(chem.kknn)
+table(chem.test$Impurity.Type,fit)
+data.frame(chem.test$Impurity.Type,fit)
+
+kknn.dist(chem.learn,chem.test,k=7,distance = 2)
+
+
+pcol <- as.character(as.numeric(chem.test$Impurity.Type))
+pairs(chem.test[3:8], pch = pcol, col = c("green3", "red")[(chem.test$Impurity.Type != fit)+1])
+
+ 
+
+data("iris")
+model.iris = svm(Species ~ .,iris)
+plot(model.iris,iris,Petal.Width ~ Petal.Length,slice = list(Sepal.Width=3,Sepal.Length = 4))
+
+
+
+"
+
+#??????SVM
+linear.tune<-tune.svm(Impurity.Type~I+II+III+IV+V+Temp,data=training_set,kernel='linear', cost = 14)
+summary(linear.tune)
+
+best.linear<-linear.tune$best.model
+
+tune.test<-predict(best.linear,newdata=sub3.test)
+table(tune.test,sub3.test$Impurity.Type)
+data.frame(tune.test,sub3.test$Impurity.Type)
+
+linear.tunewhole<-tune.svm(Impurity.Type~I+II+III+IV+V+Temp,data=training_set,kernel ='linear', cost=c(10,20,30,40,50,60,70,80,90))
+summary(linear.tunewhole)
+best.linearwhole <- linear.tunewhole$best.model
+predictionwhole<-predict(best.linearwhole,newdata=training_set)
+dftrain<-data.frame(training_set[,2],predictionwhole)"
+
+
+######partition1
+'linear.tune1<-tune.svm(Impurity.Type~I+II+III+IV+V+Temp,data=training_set,kernel='linear',cost = c(10,20,30,40,50,60,70,80,90))
+summary(linear.tune1)
+
+best.linear1<-linear.tune1$best.model
+prediction1<-predict(best.linear1,newdata=test.c3train1)
+data.frame(training_set[,2],prediction1)
+
+
+linear.tune<-tune.svm(Impurity.Type~I+II+III+IV+V+Temp,data=train.c3train1,kernel='linear', cost = c(0,5,10,20,30,40,50,60,70,80,90))
+
+prediction2
+
+prediction.linear.svm<-predict(best.linear,newdata=test_set)'
+
+
+
+
+
+#index = sample( seq_len ( nrow (training_set)), size =0.8*nrow(training_set) ,replace = FALSE) #randomly choose elements
+#Create sub.training and sub.test set
+#sub3.train = training_set[index,]
+#sub3.test =  training_set[-index,]
+#svmfit <- svm (Impurity.Type~I+II+III+IV+V+Temp, data = sub3.train, kernel = "radial", cost =1 , gamma=1) # radial svm, scaling turned OFF
+#print(svmfit)
+#tune.out<-tune(svm,Impurity.Type~I+II+III+IV+V+Temp, data = c3train, kernel = "radial", ranges=list(cost =c(500,1000,2000,3000,5000,10000,15000,20000,25000,30000,35000,40000) , gamma=c(0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1,2,3,4)))
+#summary(tune.out)
+
+#pred=predict (tune.out$best.model , newdata =sub3.test)
+
+#data.frame(sub3.test[,2],pred)
+
+
+library(e1071)
+
+index = sample( seq_len ( nrow (c3train)), size =0.8*nrow(c3train) ,replace = FALSE) #randomly choose elements
+#Create sub.training and sub.test set
+sub3.train = c3train[index,]
+sub3.test =  c3train[-index,]
+tune.out1<-tune(svm,Impurity.Type~I+II+III+IV+V+Temp, data = sub3.train, kernel = "radial",ranges=list(cost =c(1000,2000,2500,2600,2700,3000,4000,4500,5000,5500,10000,20000,30000,40000) , gamma=c(0.00001,0.0001,0.0003,0.0005,0.001,0.002,0.003,0.004,0.005,0.006,0.01,0.015,0.02,0.05,0.1,0.5,1)))
+summary(tune.out1)
+str(tune.out1)
+
+plot(tune.out1)
+pred.output1=predict(tune.out1$best.model , newdata =sub3.test)
+testdata.frame1<-data.frame(pred.output1,sub3.test[,2])
+testdata.frame1
+type.probability<-length(which(pred.output1==sub3.test[,2])==TRUE)/length(pred.output1)
+type.probability
+
+#[1] 0.8421053
+#[1] 0.8421053
+#[1] 0.7368421
+#[1] 0.9473684
+#[1] 0.6842105
+#[1] 0.8421053
+#[1] 0.8947368
+#[1] 0.9473684
+#[1] 0.8947368
+#[1] 0.7368421
+#[1] 0.8947368
+a<-(0.8421053*3+0.7368421*2+0.9473684*2+0.6842105+0.8947368*3)/11
+a
+plot.tune
+
+plot(tune.out1,sub3.train)
+
+tune.out<-tune(svm,Impurity.Type~I+II+III+IV+V+Temp, data = training_set, kernel = "radial", ranges=list(cost =c(1000,2000,2500,2600,2700,3000,4000,4500,5000,5500,10000,20000,30000,40000) , gamma=c(0.00001,0.0001,0.0003,0.0005,0.001,0.002,0.003,0.004,0.005,0.006,0.01,0.015,0.02,0.05,0.1,0.5,1,2,3,4)))
+summary(tune.out)
+pred.output=predict (tune.out$best.model , newdata =test_set)
+pred.output
+testdata.frame<-data.frame(pred.output,test_set)
+
+
+test.predict.type<-test.predict.type[,2]
+test.newdataset<-cbind(test.predict.type,test_set)
+
+'write.csv(pred.output,file="prediction.svm 20190321.csv",row.name=TRUE)'
+
+
+## a simple example
+data(cats, package = "MASS")
+m <- svm(Sex~., data = cats)
+plot(m, cats)
+
+## more than two variables: fix 2 dimensions
+data(iris)
+m2 <- svm(Species~., data = iris)
+plot(m2, iris, Petal.Width ~ Petal.Length,
+     slice = list(Sepal.Width = 3, Sepal.Length = 4))
+
+## plot with custom symbols and colors
+plot(m, cats, svSymbol = 1, dataSymbol = 2, symbolPalette = rainbow(4),
+     color.palette = terrain.colors)
+
+
+
+
+
+
+
+
+
+
+
+tune.out1<-tune(svm,Impurity.Type~I+II+III+IV+V+Temp, data = sub3.train, kernel = "radial", ranges=list(cost =c(1000,3000,4000,5000,7500,10000,20000,25000,30000,35000,40000) , gamma=c(0.00001,0.0001,0.0003,0.0005,0.001,0.002,0.003,0.004,0.005,0.006,0.01,0.015,0.02,0.05,0.1)))
+summary(tune.out1)
+pred=predict (tune.out1$best.model , newdata =sub3.test)
+data.frame(sub3.test[,2],pred)
+write.csv(predict,file="prediction.2.csv",row.name=TRUE)"
+
+"install.packages('ROCR')
+library(ROCR)
+rocplot =function (pred , truth , ...){
+   predob = prediction (pred , truth)
+   perf = performance (predob,"tpr","fpr")
+   plot(perf ,...)}
+svmfit.opt=svm(Impurity.Type~I+II+III+IV+V+Temp, data =sub3.train, kernel ="radial",gamma=0.1, cost=50, decision.values =T)
+summary(svmfit.opt)
+fitted =attributes (predict (svmfit.opt ,sub3.test[,3:8], decision.values=TRUE))$decision.values
+par(mfrow=c(1,2))
+rocplot(fitted ,sub3.test[,"Impurity.Type"], main="Test Data")"
+
+
+
+NN = neuralnet(training_set[which(training_set$Impurity.Type=='A'),] ~ datatrain[,1]+datatrain[,2]+datatrain[,3]+datatrain[,4]+datatrain[,5]+datatrain[,6]+datatrain[,7]+datatrain[,8]+datatrain[,9]+datatrain[,10], datatrain, hidden = 5 , linear.output = T )
+
+#Linear models for each contaminant
+require(caret)
+
+lm.stepA<-step(lm(Impurity.Percent~I+I(exp(I))+II+III+I((III)^3)+Temp,data=training_set[which(training_set$Impurity.Type=='A'),]))
+lm.stepB<-step(lm(Impurity.Percent~I+II+III+I(III^2)+IV+V+I(log(V)),data=training_set[which(training_set$Impurity.Type=='B'),]))
+lm.stepE<-step(lm(Impurity.Percent~II+III+IV+V+Temp,data=training_set[which(training_set$Impurity.Type=='E'),]))
+lm.stepL<-step(lm(Impurity.Percent~I(I^2)+IV+V+Temp+I(Temp^2),data=training_set[which(training_set$Impurity.Type=='L'),]))
+lm.stepM<-step(lm(Impurity.Percent~II+IV+I(log(IV))+V,data=training_set[which(training_set$Impurity.Type=='M'),]))
+A.percentage<-predict(lm.stepA,data=training_set[which(training_set$Impurity.Type=='A'),])
+data.frame(A.percentage,training_set[which(training_set$Impurity.Type=='A'),1])
+data.frame(RMSE = RMSE(training_set[which(training_set$Impurity.Type=='A'),1],A.percentage ))
+#RMSE=0.1434155
+
+summary(lm.stepB)
+B.percentage<-predict(lm.stepB,data=training_set[which(training_set$Impurity.Type=='B'),])
+data.frame(B.percentage,training_set[which(training_set$Impurity.Type=='B'),1])
+data.frame(RMSE = RMSE(training_set[which(training_set$Impurity.Type=='B'),1],B.percentage ))
+#        RMSE  0.01842449 !! VERY LOW 
+
+#
+summary(lm.stepE)
+E.percentage<-predict(lm.stepE,data=training_set[which(training_set$Impurity.Type=='E'),])
+data.frame(E.percentage,training_set[which(training_set$Impurity.Type=='E'),1])
+data.frame(RMSE = RMSE(training_set[which(training_set$Impurity.Type=='E'),1],E.percentage ))
+
+#L
+summary(lm.stepL)
+L.percentage<-predict(lm.stepL,data=training_set[which(training_set$Impurity.Type=='L'),])
+data.frame(L.percentage,training_set[which(training_set$Impurity.Type=='L'),1])
+data.frame(RMSE = RMSE(training_set[which(training_set$Impurity.Type=='L'),1],L.percentage ))
+
+
+summary(lm.stepM)
+M.percentage<-predict(lm.stepM,data=training_set[which(training_set$Impurity.Type=='M'),])
+data.frame(M.percentage,training_set[which(training_set$Impurity.Type=='M'),1])
+data.frame(RMSE = RMSE(training_set[which(training_set$Impurity.Type=='M'),1],M.percentage ))
+
+
+#
+lm.C<-lm(Impurity.Percent~II+V+Temp,data=training_set[which(training_set$Impurity.Type=='C'),])
+summary(lm.C)
+lm.stepC<-step(lm.C)
+summary(lm.stepC)
+C.percentage<-predict(lm.stepC,data=training_set[which(training_set$Impurity.Type=='C'),])
+data.frame(C.percentage,training_set[which(training_set$Impurity.Type=='C'),1])
+data.frame(RMSE = RMSE(training_set[which(training_set$Impurity.Type=='C'),1],C.percentage ))
+
+#D
+lm.D<-lm(Impurity.Percent~II+IV+V,data=training_set[which(training_set$Impurity.Type=='D'),])
+summary(lm.D)
+lm.stepD<-step(lm.D)
+summary(lm.stepD)
+D.percentage<-predict(lm.stepD,data=training_set[which(training_set$Impurity.Type=='D'),])
+data.frame(D.percentage,training_set[which(training_set$Impurity.Type=='D'),1])
+data.frame(RMSE = RMSE(training_set[which(training_set$Impurity.Type=='D'),1],D.percentage ))
+
+
+#F
+lm.F<-lm(Impurity.Percent~I+I(I^3)+III+IV+Temp),data=training_set[which(training_set$Impurity.Type=='F'),])
+summary(lm.F)
+lm.stepF<-step(lm.F)
+summary(lm.stepF)
+F.percentage<-predict(lm.stepF,data=training_set[which(training_set$Impurity.Type=='F'),])
+data.frame(F.percentage,training_set[which(training_set$Impurity.Type=='F'),1])
+data.frame(RMSE = RMSE(training_set[which(training_set$Impurity.Type=='F'),1],F.percentage ))
+
+
+#G
+lm.G<-lm(Impurity.Percent~II+III+I(log(III))+IV+Temp,data=training_set[which(training_set$Impurity.Type=='G'),])
+summary(lm.G)
+lm.stepG<-step(lm.G)
+summary(lm.stepG)
+G.percentage<-predict(lm.stepG,data=training_set[which(training_set$Impurity.Type=='G'),])
+data.frame(G.percentage,training_set[which(training_set$Impurity.Type=='G'),1])
+data.frame(RMSE = RMSE(training_set[which(training_set$Impurity.Type=='G'),1],G.percentage ))
+
+#H
+lm.H<-lm(Impurity.Percent~I+II+IV+V,data=training_set[which(training_set$Impurity.Type=='H'),])
+summary(lm.H)
+lm.stepH<-step(lm.H)
+summary(lm.stepH)
+H.percentage<-predict(lm.stepH,data=training_set[which(training_set$Impurity.Type=='H'),])
+data.frame(H.percentage,training_set[which(training_set$Impurity.Type=='H'),1])
+data.frame(RMSE = RMSE(training_set[which(training_set$Impurity.Type=='H'),1],H.percentage ))
+
+#J
+lm.J<-lm(Impurity.Percent~I+II+III+IV+V,data=training_set[which(training_set$Impurity.Type=='J'),])
+summary(lm.J)
+lm.stepJ<-step(lm.J)
+summary(lm.stepJ)
+J.percentage<-predict(lm.stepJ,data=training_set[which(training_set$Impurity.Type=='J'),])
+data.frame(J.percentage,training_set[which(training_set$Impurity.Type=='J'),1])
+data.frame(RMSE = RMSE(training_set[which(training_set$Impurity.Type=='J'),1],J.percentage ))
+
+#K
+lm.K<-lm(Impurity.Percent~I+II+IV+Temp+I(exp(Temp)),data=training_set[which(training_set$Impurity.Type=='K'),])
+summary(lm.K)
+lm.stepK<-step(lm.K)
+summary(lm.stepK)
+K.percentage<-predict(lm.stepK,data=training_set[which(training_set$Impurity.Type=='K'),])
+data.frame(K.percentage,training_set[which(training_set$Impurity.Type=='K'),1])
+data.frame(RMSE = RMSE(training_set[which(training_set$Impurity.Type=='K'),1],K.percentage ))
+
+#N
+lm.N<-lm(Impurity.Percent~I+IV+V,data=training_set[which(training_set$Impurity.Type=='N'),])
+summary(lm.N)
+lm.stepN<-step(lm.N)
+summary(lm.stepN)
+N.percentage<-predict(lm.stepN,data=training_set[which(training_set$Impurity.Type=='N'),])
+data.frame(N.percentage,training_set[which(training_set$Impurity.Type=='N'),1])
+data.frame(RMSE = RMSE(training_set[which(training_set$Impurity.Type=='N'),1],N.percentage ))
+
+summary(lm.A)
+lm.type.Astep<-step(lm.A)
+summary(lm.type.Astep)
+lm.type.Astep2<-step(lm.type.Astep)
+summary(lm.type.Astep2)
+
+#Run this too
+prediction<-seq(0,length.out = nrow(testdata.frame))
+
+
+
+
+#Impurity percent predictor for each contaminant type
+for (i in 1:nrow(testdata.frame)) {
+  if (testdata.frame$pred.output[i]=='A') {prediction[i]<-predict(lm.stepA, newdata=testdata.frame[i,2:7])}
+  if (testdata.frame$pred.output[i]=='B') {prediction[i]<-predict(lm.stepB, newdata=testdata.frame[i,2:7])}
+  if (testdata.frame$pred.output[i]=='C') {prediction[i]<-predict(lm.stepC, newdata=testdata.frame[i,2:7])}
+  if (testdata.frame$pred.output[i]=='D') {prediction[i]<-predict(lm.stepD, newdata=testdata.frame[i,2:7])}
+  if (testdata.frame$pred.output[i]=='E') {prediction[i]<-predict(lm.stepE, newdata=testdata.frame[i,2:7])}
+  if (testdata.frame$pred.output[i]=='F') {prediction[i]<-predict(lm.stepF, newdata=testdata.frame[i,2:7])}
+  if (testdata.frame$pred.output[i]=='G') {prediction[i]<-predict(lm.stepG, newdata=testdata.frame[i,2:7])}
+  if (testdata.frame$pred.output[i]=='H') {prediction[i]<-predict(lm.stepH, newdata=testdata.frame[i,2:7])}
+  if (testdata.frame$pred.output[i]=='J') {prediction[i]<-predict(lm.stepJ, newdata=testdata.frame[i,2:7])}
+  if (testdata.frame$pred.output[i]=='K') {prediction[i]<-predict(lm.stepK, newdata=testdata.frame[i,2:7])}
+  if (testdata.frame$pred.output[i]=='L') {prediction[i]<-predict(lm.stepL, newdata=testdata.frame[i,2:7])}
+  if (testdata.frame$pred.output[i]=='M') {prediction[i]<-predict(lm.stepM, newdata=testdata.frame[i,2:7])}
+  if (testdata.frame$pred.output[i]=='N') {prediction[i]<-predict(lm.stepN, newdata=testdata.frame[i,2:7])}
+}
+
+#Run this to see output
+new.predict<-as.data.frame(prediction)
+write.csv(pred.output,file="pred.out.csv",row.name=TRUE)
+
+"data.frame(sub3.test,prediction)"
+write.csv(prediction,file="GGGGG111.csv",row.name=TRUE)
+
+"#SVM???????????????
+?rfeControl
+library(caret)
+rfeCNTL <- rfeControl(functions = lrFuncs, method = "cv", number= 10) 
+svm.features <- rfe(sub3.train[, 3:8], sub3.train[, 2], sizes = c( 6, 5, 4),rfeControl = rfeCNTL, method = "svmLinear")
+svm.features
+warnings()
+svm.5 <- svm(Impurity.Type~I+II+III+IV+V+Temp, data = sub3.train,kernel = "linear")
+svm.5.predict <- predict(svm.5, newdata = sub3.test[c(3:8)])
+ table(svm.5.predict, sub3.test$Impurity.Type)"
+
+
+
+
+"svmfit<-svm(Impurity.Type~I+II+III+IV+V+Temp,data=sub3.train,kernel="radial",cost=256,gamma=0.03125,scale=FALSE)#
+
+print(svmfit)
+prediction.1<-predict(svmfit,sub3.test[, 3:8])
+
+prediction.2<-predict(svmfit,test_set[1:6])
+
+data.frame(sub3.test[,2],prediction.1)
+
+write.csv(prediction.2,file="prediction.2.csv",row.name=TRUE)"
