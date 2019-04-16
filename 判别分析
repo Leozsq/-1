@@ -1,0 +1,190 @@
+```{r}
+rm(list = ls())
+require(caTools) 
+install.packages("MASS")
+library(MASS)
+setwd("C:\\Users\\ASUS\\Desktop\\??????????????????\\Datasets for labs-20190201")
+load("zipCode.RData")
+
+#First Reducing the dimensions of our data:???LDA???????????????,(????????????????????????????????????,?????????????????????????????????,?????????????????????)
+
+XC <- scale(train.X,scale=FALSE)
+
+cov.XC <- cov(XC)
+
+foo <- eigen(cov.XC)
+
+V <- foo$vectors[,1:2]
+
+X.2D <- XC%*%V
+
+data1 <- cbind(y,X.2D) #Our final data
+
+#Creating empty vectors to store MCE.train and MCE.test for different partitions of the data:
+MCE.train.vector <- matrix(NA,100,1)
+MCE.test.vector <- matrix(NA,100,1)
+
+#Looping over different partitions of the data, so we can find a mean:
+
+for (i in 1:100){
+ 
+  sample <- sample.int(n = nrow(data1), size = floor(0.5*nrow(data1)), replace = F) #Selecting 50% of data as sample data
+  train <- data1[sample, ] #Our partitioned training set
+  test  <- data1[-sample, ] #Our partitioned test set
+  train_x <- train[,2:3]
+  train_y <- train[,1]
+  test_x <- test[,2:3]
+  test_y <- test[,1]
+
+  qda.fit <- qda(train_x,train_y)
+  
+  #For Our training data:
+  y.predict.train.qda <- predict(qda.fit,train_x)$class
+  
+  #For our Testing data:
+  y.predict.test.qda <- predict(qda.fit,test_x)$class
+  
+  #To find MCE:
+  
+  k <- 0
+  h <- 0
+  n.train <- length(train_y)
+  n.test<- length(test_y)
+  
+  for (j in 1:n.train){
+  if (y.predict.train.qda[j] == train_y[j]){
+    k <- k+1 # the number of elements which equal in train
+  }
+  }
+  
+   for (l in 1:n.test){
+  if (y.predict.test.qda[l] == test_y[l]){
+    h <- h+1 # the number of elements which equal in test
+  }
+  }
+
+#Our MCE vectors containing the MCE for different partitions of the data
+MCE.train.vector[i] <- (n.train-k)/n.train 
+MCE.test.vector[i] <- (n.test-h)/n.test
+  
+}
+
+#Our mean MCE values:
+
+MCE.train <- mean(MCE.train.vector)
+MCE.train
+
+MCE.test <- mean(MCE.test.vector)
+MCE.test
+
+#Plotting the results of our final partition:
+
+plot(train_x[,1],train_x[,2],pch=as.character(train_y),xlab = 'x_1',ylab='x_2')
+points(test_x,col="red",pch=17)
+text(test_x,labels=y.predict.test.qda,col="red",pos=4,cex=1.2)
+
+jpeg("plot2.jpg")
+plot(train_x[,1],train_x[,2],pch=as.character(train_y),xlab = 'x_1',ylab='x_2')
+points(test_x,col="red",pch=17)
+text(test_x,labels=y.predict.test.qda,col="red",pos=4,cex=1.2)
+
+dev.off()
+
+```
+
+For a different data set:
+
+```{r}
+rm(list = ls())
+require(caTools)  
+library(MASS)
+load("classificationExample.RData")
+data1 <- cbind(y,X)
+
+#Creating empty vectors to store MCE.train and MCE.test for different partitions of the data:
+MCE.train.vector <- matrix(NA,100,1)
+MCE.test.vector <- matrix(NA,100,1)
+y.predict.matrix <- matrix(0,100,100)
+
+#Looping over different partitions of the data, so we can find a mean:
+
+for (i in 1:100){
+ 
+   sample <- sample.int(n = nrow(data1), size = floor(0.5*nrow(data1)), replace = F) #Selecting 50% of data as sample data
+  train <- data1[sample, ] #Our partitioned training set
+  test  <- data1[-sample, ] #Our partitioned test set
+  train_x <- train[,2:3]
+  train_y <- train[,1]
+  test_x <- test[,2:3]
+  test_y <- test[,1]
+  
+
+  qda.fit <- qda(train_x,train_y)
+  
+  #For Our training data:
+  y.predict.train.qda <- predict(qda.fit,train_x)$class
+  
+  #For our Testing data:
+  y.predict.test.qda <- predict(qda.fit,test_x)$class
+  
+  y.predict.matrix[,i] <- y.predict.test.qda
+  
+  #To find MCE:
+  
+  k <- 0
+  h <- 0
+  n.train <- length(train_y)
+  n.test<- length(test_y)
+  
+  for (j in 1:n.train){
+  if (y.predict.train.qda[j] == train_y[j]){
+    k <- k+1 # the number of elements which equal in train
+  }
+  }
+  
+   for (l in 1:n.test){
+  if (y.predict.test.qda[l] == test_y[l]){
+    h <- h+1 # the number of elements which equal in test
+  }
+  }
+
+#Our MCE vectors containing the MCE for different partitions of the data
+MCE.train.vector[i] <- (n.train-k)/n.train 
+MCE.test.vector[i] <- (n.test-h)/n.test
+  
+}
+
+MCE.test <- mean(MCE.test.vector)
+MCE.train <- mean(MCE.train.vector)
+
+MCE.train
+MCE.test
+
+#Plotting the boundary:
+xlims<-c(-5,28)
+ylims=c(-2,20)
+ngrid=100
+
+x1.vals=seq(xlims[1],xlims[2],length.out=ngrid)
+x2.vals=seq(ylims[1],ylims[2],length.out=ngrid)
+jpeg("plot3.jpg")
+plot(X,xlim=xlims,ylim=ylims,xlab="x_1",ylab="x_2", pch = y+1)
+
+inds.o=which(y.predict.matrix==1,arr.ind=TRUE) 
+
+points(x1.vals[inds.o[,1]],x2.vals[inds.o[,2]],pch=19,col=4,cex=0.04)
+inds.x=which(y.predict.matrix==2,arr.ind=TRUE)
+points(x1.vals[inds.x[,1]],x2.vals[inds.x[,2]],pch=19,col=2,cex=0.04)
+dev.off()
+
+#Plotting the results of our final partition:
+plot(train_x[,1],train_x[,2],pch=as.character(train_y),xlab = 'x_1',ylab='x_2')
+points(test_x,col="red",pch=17)
+text(test_x,labels=y.predict.test.qda,col="red",pos=4,cex=1)
+
+jpeg("plot4.jpg")
+plot(train_x[,1],train_x[,2],pch=as.character(train_y),xlab = 'x_1',ylab='x_2')
+points(test_x,col="red",pch=17)
+text(test_x,labels=y.predict.test.qda,col="red",pos=4,cex=1)
+
+dev.off()
