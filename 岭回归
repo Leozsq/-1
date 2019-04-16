@@ -1,0 +1,106 @@
+library(glmnet)
+
+#A
+cvfit.A<- cv.glmnet(as.matrix(training_set[which(training_set$Impurity.Type=='A'),3:8]),training_set$Impurity.Percent[which(training_set$Impurity.Type=='A')], type.measure = "mse", nfolds = 5, alpha = 0)
+best_lambda.A  <- cvfit.A$lambda.min
+plot(cvfit.A)
+prediction.A<-predict(cvfit.A, newx =as.matrix(training_set[which(training_set$Impurity.Type=='A'),3:8]), s = best_lambda.A)
+A.pred.percentage<-data.frame(training_set$Impurity.Percent[which(training_set$Impurity.Type=='A')], prediction.A, RMSE = RMSE(training_set$Impurity.Percent[which(training_set$Impurity.Type=='A')], prediction.A))
+
+#B
+cvfit.B<- cv.glmnet(as.matrix(training_set[which(training_set$Impurity.Type=='B'),3:8]),training_set$Impurity.Percent[which(training_set$Impurity.Type=='B')], type.measure = "mse", nfolds = 5, alpha = 0)
+best_lambda.B <- cvfit.B$lambda.min
+plot(cvfit.B)
+prediction.B<-predict(cvfit.B, newx =as.matrix(training_set[which(training_set$Impurity.Type=='B'),3:8]), s = best_lambda.B)
+B.pred.percentage<-data.frame(training_set$Impurity.Percent[which(training_set$Impurity.Type=='B')], prediction.B, RMSE = RMSE(training_set$Impurity.Percent[which(training_set$Impurity.Type=='B')], prediction.B))
+
+#C
+cvfit.C<- cv.glmnet(as.matrix(training_set[which(training_set$Impurity.Type=='C'),3:8]),training_set$Impurity.Percent[which(training_set$Impurity.Type=='C')], type.measure = "mse", nfolds = 5, alpha = 0)
+best_lambda.C <- cvfit.C$lambda.min
+
+plot(cvfit.C)
+prediction.C<-predict(cvfit.C, newx =as.matrix(training_set[which(training_set$Impurity.Type=='C'),3:8]), s = best_lambda.C)
+C.pred.percentage<-data.frame(training_set$Impurity.Percent[which(training_set$Impurity.Type=='C')], prediction.C, RMSE = RMSE(training_set$Impurity.Percent[which(training_set$Impurity.Type=='C')], prediction.C))
+
+#D
+cvfit.D <- cv.glmnet(as.matrix(training_set[which(training_set$Impurity.Type=='D'),3:8]),training_set$Impurity.Percent[which(training_set$Impurity.Type=='D')], type.measure = "mse", nfolds = 5, alpha = 0)
+best_lambda.D <- cvfit.D$lambda.min
+
+plot(cvfit.D)
+prediction.D<-predict(cvfit.D, newx =as.matrix(training_set[which(training_set$Impurity.Type=='D'),3:8]), s = best_lambda.D)
+D.pred.percentage<-data.frame(training_set$Impurity.Percent[which(training_set$Impurity.Type=='D')], prediction.D, RMSE = RMSE(training_set$Impurity.Percent[which(training_set$Impurity.Type=='D')], prediction.D))
+
+#E
+cvfit.E <- cv.glmnet(as.matrix(training_set[which(training_set$Impurity.Type=='E'),3:8]),training_set$Impurity.Percent[which(training_set$Impurity.Type=='E')], type.measure = "mse", nfolds = 5, alpha = 0)
+best_lambda.E <- cvfit.E$lambda.min
+
+plot(cvfit.E)
+prediction.E<-predict(cvfit.E, newx =as.matrix(training_set[which(training_set$Impurity.Type=='E'),3:8]), s = best_lambda.E)
+E.pred.percentage<-data.frame(training_set$Impurity.Percent[which(training_set$Impurity.Type=='E')], prediction.E, RMSE = RMSE(training_set$Impurity.Percent[which(training_set$Impurity.Type=='E')], prediction.E))
+
+#F
+cvfit.F <- cv.glmnet(as.matrix(training_set[which(training_set$Impurity.Type=='F'),3:8]),training_set$Impurity.Percent[which(training_set$Impurity.Type=='F')], type.measure = "mse", nfolds = 5, alpha = 0)
+best_lambda.F <- cvfit.F$lambda.min
+
+plot(cvfit.F)
+prediction.F<-predict(cvfit.F, newx =as.matrix(training_set[which(training_set$Impurity.Type=='F'),3:8]), s = best_lambda.F)
+F.pred.percentage<-data.frame(training_set$Impurity.Percent[which(training_set$Impurity.Type=='F')], prediction.F, RMSE = RMSE(training_set$Impurity.Percent[which(training_set$Impurity.Type=='F')], prediction.F))
+
+#G
+cvfit.G <- cv.glmnet(as.matrix(training_set[which(training_set$Impurity.Type=='G'),3:8]),training_set$Impurity.Percent[which(training_set$Impurity.Type=='G')], type.measure = "mse", nfolds = 5, alpha = 0)
+best_lambda.G <- cvfit.G$lambda.min
+
+plot(cvfit.G)
+prediction.G<-predict(cvfit.G, newx =as.matrix(training_set[which(training_set$Impurity.Type=='G'),3:8]), s = best_lambda.G)
+G.pred.percentage<-data.frame(training_set$Impurity.Percent[which(training_set$Impurity.Type=='G')], prediction.G, RMSE = RMSE(training_set$Impurity.Percent[which(training_set$Impurity.Type=='G')], prediction.G))
+
+#H
+cvfit.H <- cv.glmnet(as.matrix(training_set[which(training_set$Impurity.Type=='H'),3:8]),training_set$Impurity.Percent[which(training_set$Impurity.Type=='H')], type.measure = "mse", nfolds = 5, alpha = 0)
+best_lambda.H <- cvfit.H$lambda.min
+
+plot(cvfit.H)
+prediction.H<-predict(cvfit.H, newx =as.matrix(training_set[which(training_set$Impurity.Type=='H'),3:8]), s = best_lambda.H)
+H.pred.percentage<-data.frame(training_set$Impurity.Percent[which(training_set$Impurity.Type=='H')], prediction.H, RMSE = RMSE(training_set$Impurity.Percent[which(training_set$Impurity.Type=='H')], prediction.H))
+
+#J
+cvfit.J <- cv.glmnet(as.matrix(training_set[which(training_set$Impurity.Type=='J'),3:8]),training_set$Impurity.Percent[which(training_set$Impurity.Type=='J')], type.measure = "mse", nfolds = 5, alpha = 0)
+best_lambda.J <- cvfit.J$lambda.min
+
+plot(cvfit.J)
+prediction.J<-predict(cvfit.J, newx =as.matrix(training_set[which(training_set$Impurity.Type=='J'),3:8]), s = best_lambda.J)
+J.pred.percentage<-data.frame(training_set$Impurity.Percent[which(training_set$Impurity.Type=='J')], prediction.J, RMSE = RMSE(training_set$Impurity.Percent[which(training_set$Impurity.Type=='J')], prediction.J))
+
+#K
+cvfit.K <- cv.glmnet(as.matrix(training_set[which(training_set$Impurity.Type=='K'),3:8]),training_set$Impurity.Percent[which(training_set$Impurity.Type=='K')], type.measure = "mse", nfolds = 5, alpha = 0)
+best_lambda.K <- cvfit.K$lambda.min
+
+plot(cvfit.K)
+prediction.K<-predict(cvfit.K, newx =as.matrix(training_set[which(training_set$Impurity.Type=='K'),3:8]), s = best_lambda.K)
+K.pred.percentage<-data.frame(training_set$Impurity.Percent[which(training_set$Impurity.Type=='K')], prediction.K, RMSE = RMSE(training_set$Impurity.Percent[which(training_set$Impurity.Type=='K')], prediction.K))
+
+#L
+cvfit.L <- cv.glmnet(as.matrix(training_set[which(training_set$Impurity.Type=='L'),3:8]),training_set$Impurity.Percent[which(training_set$Impurity.Type=='L')], type.measure = "mse", nfolds = 5, alpha = 0)
+best_lambda.L <- cvfit.L$lambda.min
+
+plot(cvfit.L)
+prediction.L<-predict(cvfit.L, newx =as.matrix(training_set[which(training_set$Impurity.Type=='L'),3:8]), s = best_lambda.L)
+L.pred.percentage<-data.frame(training_set$Impurity.Percent[which(training_set$Impurity.Type=='L')], prediction.L, RMSE = RMSE(training_set$Impurity.Percent[which(training_set$Impurity.Type=='L')], prediction.L))
+
+#M
+cvfit.M <- cv.glmnet(as.matrix(training_set[which(training_set$Impurity.Type=='M'),3:8]),training_set$Impurity.Percent[which(training_set$Impurity.Type=='M')], type.measure = "mse", nfolds = 5, alpha = 0)
+best_lambda.M <- cvfit.M$lambda.min
+
+plot(cvfit.M)
+prediction.M<-predict(cvfit.M, newx =as.matrix(training_set[which(training_set$Impurity.Type=='M'),3:8]), s = best_lambda.M)
+M.pred.percentage<-data.frame(training_set$Impurity.Percent[which(training_set$Impurity.Type=='M')], prediction.M, RMSE = RMSE(training_set$Impurity.Percent[which(training_set$Impurity.Type=='M')], prediction.M))
+
+#N
+cvfit.N <- cv.glmnet(as.matrix(training_set[which(training_set$Impurity.Type=='N'),3:8]),training_set$Impurity.Percent[which(training_set$Impurity.Type=='N')], type.measure = "mse", nfolds = 5, alpha = 0)
+best_lambda.N <- cvfit.N$lambda.min
+
+plot(cvfit.N)
+prediction.N<-predict(cvfit.N, newx =as.matrix(training_set[which(training_set$Impurity.Type=='N'),3:8]), s = best_lambda.N)
+N.pred.percentage<-data.frame(training_set$Impurity.Percent[which(training_set$Impurity.Type=='N')], prediction.N, RMSE = RMSE(training_set$Impurity.Percent[which(training_set$Impurity.Type=='N')], prediction.N))
+
+df.rr.err<-rbind(A.pred.percentage,B.pred.percentage,C.pred.percentage,D.pred.percentage,E.pred.percentage,F.pred.percentage,G.pred.percentage,H.pred.percentage,J.pred.percentage,K.pred.percentage,L.pred.percentage,M.pred.percentage,N.pred.percentage)
+colnames(df.rr.err)<-c("Observed", "Predicted", "RMSE")
