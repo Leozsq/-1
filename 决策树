@@ -1,0 +1,92 @@
+install.packages("ISLR")
+library(ISLR)
+data <- data.frame(Auto)
+str(data)
+da <- data[,-match(c("name"),names(data))]
+str(da)
+mpg_mean <- mean(da$mpg)
+da$class[da$mpg>=mpg_mean] <- "yes"
+da$class[da$mpg<mpg_mean] <- "no"
+da$class
+
+#Divide the data into training set and test set
+install.packages("caTools")   #Packages that divide data sets
+library("caTools")
+set.seed(200)   #The parameters can be any number to ensure that the results are the same each run
+spl <- sample.split(da$mpg,SplitRatio=0.7)
+da.Train <- subset(da,spl==TRUE)
+da.Test <- subset(da,spl==FALSE)
+da.Train
+da.Test
+
+#Import package and establish regression tree model
+install.packages("rpart")
+library(rpart)
+install.packages("rpart.plot")
+library(rpart.plot)
+fit.Tree <- rpart(class~cylinders+displacement+horsepower+weight+acceleration+year+origin,data = da.Train,method = "class")
+#(continuous)anova£¬(discrete)class£¬(count type)poisson£¬(survival analysis type)exp
+plot(fit.Tree,uniform=T, branch=1, margin=0.1, main="Classification Tree")
+text(fit.Tree,use.n=T, col="blue")
+rpart.plot(fit.Tree,branch=1,type=1,split.col="red",box.col="yellow",main="Classification Tree")
+prp(fit.Tree)
+
+printcp(fit.Tree)
+plotcp(fit.Tree)  #Find the CP value corresponding to the minimum xerror point, from which CP value determines the size of the tree
+summary(fit.Tree)
+
+#Predict the test set and use the confusion matrix to calculate the fitting degree for discrete data
+PredictCART = predict(fit.Tree, newdata = da.Test,type="class")
+PredictCART
+CM <- table(da.Test$class, PredictCART)
+CM
+Accuracy <- sum(diag(CM))/sum(CM)
+Accuracy
+
+#Pruning
+fit.Tree2 <- prune(fit.Tree, cp= fit.Tree$cptable[which.min(fit.Tree$cptable[,"xerror"]),"CP"])
+rpart.plot(fit.Tree2,branch=1,type=1,split.col="red",box.col="yellow",main="Regression Tree")
+#This classification tree requires a lot of pruning
+prp(fit.Tree2)
+summary(fit.Tree2)
+
+#boosting
+install.packages("gbm")
+library(gbm)
+da.Train$class = ifelse(da.Train$class == "yes",1,0)
+test1 <- gbm(class~cylinders+displacement+horsepower+weight+acceleration+year+origin,data = da.Train,distribution="bernoulli",n.trees = 2000,cv.folds = 3)
+summary(test1)
+number.gbm <- gbm.perf(test1,method = "cv")
+number.gbm
+#Calculate the singularity of the logarithm of the Bernoulli loss function
+predict.gbm <- predict(test1,da.Test,n.trees = number.gbm)
+str(predict.gbm)
+#The ROC curve was drawn to obtain the optimal critical value of the maximum accuracy
+library(stats)
+install.packages("pROC")
+library(pROC)
+test.roc <- roc(da.Test$class,predict.gbm)
+plot(test.roc)
+#The coords function is called to call the optimal threshold, which is used to obtain the corresponding prediction category
+coords(test.roc,"best")
+predict.gbm.class <- ifelse(predict.gbm > coords(test.roc,"best")["threshold"],"yes","no")
+predict.gbm.class
+CM.gbm <- table(da.Test$class,predict.gbm.class)
+CM.gbm
+Accuracy.gbm <- sum(diag(CM.gbm))/sum(CM.gbm)
+Accuracy.gbm
+
+#randomForest
+install.packages("randomForest")
+library(randomForest)
+set.seed(1)
+da.Train$class <- as.factor(da.Train$class)
+test.forest <- randomForest(class~.,data = da.Train)
+test2.forest <- randomForest()
+importance(test.forest)
+pre.forest <- predict(test.forest,da.Test,type="class")
+pre.forest
+CM1 <- table(pre.forest,da.Test$class)
+CM1
+Accuracy <- sum(diag(CM1))/sum(CM1)
+Accuracy
