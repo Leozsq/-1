@@ -1,0 +1,272 @@
+#Run on opening 
+#install.packages("neuralnet")
+#library(neuralnet)
+```
+
+```{r}
+setwd("Z:\\SML\\Neural_Networks")
+load("zipCode.RData")
+```
+
+```{r}
+fullsize=nrow(train.X)
+samplesize = 0.70 * fullsize
+index = sample( seq_len ( nrow ( train.X ) ), size = samplesize ) #randomly choose elements
+
+# Create training and test set
+datatrain = train.X[ index, ]
+datatest = train.X[ -index, ]
+```
+
+
+
+
+```{r}
+train.y=y[index]
+test.y=y[-index] #test data is kept in numerical order but with most removed for training
+NN = neuralnet(train.y ~ datatrain[,1]+datatrain[,2]+datatrain[,3]+datatrain[,4]+datatrain[,5]+datatrain[,6]+datatrain[,7]+datatrain[,8]+datatrain[,9]+datatrain[,10], datatrain, hidden = 5 , linear.output = T ) #Neural network based on first 10 pixel values, this was already quite difficult for the computer, using all pixels may be unrealistic
+
+plot(NN)
+```
+
+```{r}
+predict_testNN = compute(NN, datatest[,c(1:10)])
+```
+
+
+```{r}
+
+classifier=c()
+for(i in 1:(fullsize-samplesize)){
+  if(predict_testNN$net.result[i]<2){
+    classifier[i]=1
+  }
+  else if(predict_testNN$net.result[i]>5.5){
+    classifier[i]=8
+  }
+  else{classifier[i]=3}
+}
+a=1
+correctclassification=c()
+for(i in 1:(fullsize-samplesize)){
+  if(classifier[a]==y[i]){
+    correctclassification[i]=1
+  }
+  else{
+    correctclassification[i]=0
+  }
+  a=a+1
+}
+correctclassification
+
+#Proportion correctly classified:
+length(which(correctclassification==1))/(fullsize-samplesize)
+#this isn't great because we're only using the first 10 pixel values
+#try again with reduced dimensionality to include all pixels
+```
+
+
+```{r}
+centeringMatrix<-function(n){
+  centeringMatrix=diag(n)-(1/n)*matrix(1,n,n)
+}
+```
+
+
+```{r}
+X=train.X
+
+n=dim(X)[1]
+p=dim(X)[2]
+C=centeringMatrix(n)
+XC=C%*%X 
+
+G=matrix(0,n,n)
+for(i in 1:n){
+  for(j in 1:n){
+    sumofsquares=0
+    for(k in 1:n){
+      sumofsquares=sumofsquares+(X[i,k]-X[j,k])^2
+    }
+    G[i,j]=-0.5*(sumofsquares)
+  }
+}
+
+B=C%*%G%*%C
+
+LAMBDA=diag(eigen(var(B))$values)
+A=(eigen(var(B))$vectors)
+
+r=10 #going for R dimensional output
+
+LAMBDA=LAMBDA[,1:r]
+
+for(i in 1:r){
+  LAMBDA[i,i]=sqrt(LAMBDA[i,i])
+}
+
+Y=A%*%LAMBDA
+plot(Y[,1],Y[,2])
+
+#Y <- as.data.frame(Y)
+datatrain.MDS = Y[ index, ]
+datatest.MDS = Y[ -index, ]
+train.y.MDS=y[index]
+test.y.MDS=y[-index]
+```
+
+```{r}
+NN.MDS = neuralnet(train.y.MDS ~ datatrain.MDS[,1]+datatrain.MDS[,2]+datatrain.MDS[,3]+datatrain.MDS[,4]+datatrain.MDS[,5]+datatrain.MDS[,6]+datatrain.MDS[,7]+datatrain.MDS[,8]+datatrain.MDS[,9]+datatrain.MDS[,10], datatrain.MDS, hidden = 5 ) 
+
+plot(NN.MDS)
+```
+
+```{r}
+#ghghg=datatrain.MDS
+#f <- as.formula(paste("train.y.MDS ~", paste("datatrain.MDS[,",paste(i[i %in% 1:10],paste("]", collapse = " + ")))))
+           # +datatrain.MDS[,3]+datatrain.MDS[,4]+datatrain.MDS[,5]+datatrain.MDS[,6]+datatrain.MDS[,7]+datatrain.MDS[,8]+datatrain.MDS[,9]+datatrain.MDS[,10]
+
+
+#i=1:r
+#f <- as.formula(paste("train.y.MDS ~", paste(i[1:r], collapse = " + ")))
+#f =formula(train.y.MDS,datatrain.MDS)
+
+
+
+#NN.MDS2 = neuralnet(train.y.MDS ~ datatrain.MDS[,1:10], datatrain.MDS, hidden = 5 ) 
+
+#plot(NN.MDS)
+```
+
+
+```{r}
+predict_testNN.MDS = compute(NN.MDS, datatest.MDS[,c(1:r)])
+```
+
+
+```{r}
+
+classifier.MDS=c()
+for(i in 1:(fullsize-samplesize)){
+  if(predict_testNN.MDS$net.result[i]<2){
+    classifier.MDS[i]=1
+  }
+  else if(predict_testNN.MDS$net.result[i]>5.5){
+    classifier.MDS[i]=8
+  }
+  else{classifier.MDS[i]=3}
+}
+
+correctclassification.MDS=c()
+for(i in 1:(fullsize-samplesize)){
+  if(classifier.MDS[i]==test.y.MDS[i]){
+    correctclassification.MDS[i]=1
+  }
+  else{
+    correctclassification.MDS[i]=0
+  }
+}
+correctclassification.MDS
+
+#Proportion correctly classified:
+length(which(correctclassification.MDS==1))/(fullsize-samplesize)
+```
+
+```{r}
+#https://www.r-bloggers.com/fitting-a-neural-network-in-r-neuralnet-package/ 
+#come back to this one for what to do about missing data
+
+
+centeringMatrix<-function(n){
+  centeringMatrix=diag(n)-(1/n)*matrix(1,n,n)
+}
+
+
+#X is dataset
+#r is dimension for dimension reduction, maximum allowed is 10 here
+#hidden is number of hidden nodes
+Neural <- function(r,X,hidden){
+  
+n=dim(X)[1]
+p=dim(X)[2]
+C=centeringMatrix(n)
+XC=C%*%X 
+samplesize = 0.70 * n
+index = sample( seq_len ( nrow ( train.X ) ), size = samplesize )
+
+G=matrix(0,n,n)
+for(i in 1:n){
+  for(j in 1:n){
+    sumofsquares=0
+    for(k in 1:n){
+      sumofsquares=sumofsquares+(X[i,k]-X[j,k])^2
+    }
+    G[i,j]=-0.5*(sumofsquares)
+  }
+}
+
+B=C%*%G%*%C
+LAMBDA=diag(eigen(var(B))$values)
+A=(eigen(var(B))$vectors)
+LAMBDA=LAMBDA[,1:r]
+for(i in 1:r){
+  LAMBDA[i,i]=sqrt(LAMBDA[i,i])
+}
+Y=A%*%LAMBDA
+datatrain.MDS = Y[ index, ]
+datatest.MDS = Y[ -index, ]
+train.y.MDS=y[index]
+test.y.MDS=y[-index]
+
+#if(r<10){
+#  for(i in (r+1):10){
+#    print(datatrain.MDS)
+#    print(samplesize)
+#    print(c(rep(0,samplesize)))
+#    print(cbind(c(rep(0,samplesize)),c(rep(0,samplesize))))
+#    datatrain.MDS=cbind(datatrain.MDS,c(rep(0,samplesize)))
+#  }
+#} HAVENT FIGURED OUT r<10 YET
+
+NN.MDS = neuralnet(train.y.MDS ~ datatrain.MDS[,1]+datatrain.MDS[,2]+datatrain.MDS[,3]+datatrain.MDS[,4]+datatrain.MDS[,5]+datatrain.MDS[,6]+datatrain.MDS[,7]+datatrain.MDS[,8]+datatrain.MDS[,9]+datatrain.MDS[,10], datatrain.MDS, hidden = hidden ) 
+
+predict_testNN.MDS = compute(NN.MDS, datatest.MDS[,c(1:r)])
+classifier.MDS=c()
+for(i in 1:(n-samplesize)){
+  if(predict_testNN.MDS$net.result[i]<2){
+    classifier.MDS[i]=1
+  }
+  else if(predict_testNN.MDS$net.result[i]>5.5){
+    classifier.MDS[i]=8
+  }
+  else{classifier.MDS[i]=3}
+}
+
+correctclassification.MDS=c()
+for(i in 1:(n-samplesize)){
+  if(classifier.MDS[i]==test.y.MDS[i]){
+    correctclassification.MDS[i]=1
+  }
+  else{
+    correctclassification.MDS[i]=0
+  }
+}
+correctclassification.MDS
+
+#Proportion correctly classified:
+prop=length(which(correctclassification.MDS==1))/(n-samplesize)
+return(prop)
+}
+
+Neural(10,train.X,5)
+
+classresults105=c()
+
+for(i in 1:100)
+{
+  classresults105[i]=Neural(10,train.X,5)
+}
+hist(classresults105,xlab="Proportion Correctly Classified",main="Histogram of Classification Success given 10 input and 5 hidden nodes") #exact shape isnt ideal as possible proportions are far from continuous 
+var(classresults105)
+mean(classresults105)
+```
